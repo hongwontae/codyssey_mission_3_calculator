@@ -1,3 +1,5 @@
+import json
+
 
 CROSS_FILTER = [
     [0, 1, 0],
@@ -11,12 +13,55 @@ X_FILTER = [
     [1, 0, 1]
 ]
 
+def run_json_mode():
+    with open("data.json", "r") as file:
+        data = json.load(file)
+
+    patterns = data["patterns"]
+    filters = data["filters"]
+
+    for pattern_name, pattern in patterns.items():
+
+        print()
+        print("#" + "-" * 30)
+        print(f"# [{pattern_name}]")
+        print("#" + "-" * 30)
+
+        input_data = pattern["input"]
+        expected = pattern["expected"]
+
+        size_key = "_".join(pattern_name.split("_")[:2])
+        size_filter = filters[size_key]
+
+        cross_filter = size_filter["cross"]
+        x_filter = size_filter["x"]
+
+        cross_score = mac(input_data, cross_filter)
+        x_score = mac(input_data, x_filter)
+
+        result = classify(cross_score, x_score)
+
+        # JSON의 expected 라벨을 프로그램 판정값으로 변환
+        normalized_expected = normalize_expected(expected)
+
+        print("Cross 점수:", cross_score)
+        print("X 점수:", x_score)
+        print("점수 차이:", abs(cross_score - x_score))
+        print("판정:", result)
+        print("정답:", expected)
+
+        if result == normalized_expected:
+            print("결과: PASS")
+        else:
+            print("결과: FAIL")
 
 def mac(input_data, filter_data):
     score = 0
 
-    for i in range(3):
-        for j in range(3):
+    size = len(input_data)
+
+    for i in range(size):
+        for j in range(size):
             score += input_data[i][j] * filter_data[i][j]
 
     return score
@@ -59,6 +104,15 @@ def classify(cross_score, x_score):
         return "Cross"
 
     return "X"
+
+def normalize_expected(expected):
+    if expected == "+":
+        return "Cross"
+
+    if expected.lower() == "x":
+        return "X"
+
+    return "UNDECIDED"
 
 def run_user_mode():
 
@@ -107,7 +161,7 @@ def main():
                 run_user_mode()
 
             elif choice == "2":
-                print("모드 2는 아직 구현하지 않았습니다.")
+                run_json_mode()
 
             elif choice == "0":
                 print("프로그램을 종료합니다.")
