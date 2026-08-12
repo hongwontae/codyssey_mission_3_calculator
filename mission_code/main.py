@@ -1,17 +1,19 @@
 import json
+import time
 
 
-CROSS_FILTER = [
-    [0, 1, 0],
-    [1, 1, 1],
-    [0, 1, 0]
-]
 
-X_FILTER = [
-    [1, 0, 1],
-    [0, 1, 0],
-    [1, 0, 1]
-]
+# CROSS_FILTER = [
+#     [0, 1, 0],
+#     [1, 1, 1],
+#     [0, 1, 0]
+# ]
+
+# X_FILTER = [
+#     [1, 0, 1],
+#     [0, 1, 0],
+#     [1, 0, 1]
+# ]
 
 def run_json_mode():
     with open("data.json", "r") as file:
@@ -19,6 +21,11 @@ def run_json_mode():
 
     patterns = data["patterns"]
     filters = data["filters"]
+
+    total = 0
+    passed = 0
+    failed = 0
+    fail_cases = []
 
     for pattern_name, pattern in patterns.items():
 
@@ -36,8 +43,17 @@ def run_json_mode():
         cross_filter = size_filter["cross"]
         x_filter = size_filter["x"]
 
+        # MAC 점수
         cross_score = mac(input_data, cross_filter)
         x_score = mac(input_data, x_filter)
+
+        # 성능 측정
+        cross_time = benchmark_mac(input_data, cross_filter)
+        x_time = benchmark_mac(input_data, x_filter)
+
+        # 연산 횟수
+        size = len(input_data)
+        operation_count = size * size
 
         result = classify(cross_score, x_score)
 
@@ -50,10 +66,35 @@ def run_json_mode():
         print("판정:", result)
         print("정답:", expected)
 
+        print(f"Cross 평균 시간(10회): {cross_time:.3f} ms")
+        print(f"X 평균 시간(10회): {x_time:.3f} ms")
+        print(f"연산 횟수: {operation_count}")
+
+        total += 1
+
         if result == normalized_expected:
             print("결과: PASS")
+            passed += 1
         else:
             print("결과: FAIL")
+            failed += 1
+            fail_cases.append(pattern_name)
+
+    print()
+    print("#" + "-" * 30)
+    print("# [4] 결과 요약")
+    print("#" + "-" * 30)
+
+    print(f"총 테스트: {total}개")
+    print(f"통과: {passed}개")
+    print(f"실패: {failed}개")
+
+    if fail_cases:
+        print()
+        print("실패 케이스:")
+
+        for case in fail_cases:
+            print(f"- {case}")
 
 def mac(input_data, filter_data):
     score = 0
@@ -66,7 +107,27 @@ def mac(input_data, filter_data):
 
     return score
 
-def input_matrix():
+def benchmark_mac(input_data, filter_data):
+    total_time = 0
+    repeat = 10
+
+    for _ in range(repeat):
+        start = time.perf_counter()
+
+        mac(input_data, filter_data)
+
+        end = time.perf_counter()
+
+        total_time += end - start
+
+    average_time = total_time / repeat
+
+    # 초 -> 밀리초
+    average_time_ms = average_time * 1000
+
+    return average_time_ms
+
+def input_matrix_3x3():
     matrix = []
 
     print("3개의 숫자를 공백으로 구분해서 입력하세요.")
@@ -94,7 +155,6 @@ def input_matrix():
 
     return matrix
 
-# 판정
 def classify(cross_score, x_score):
     # 두 점수가 거의 같으면 UNDECIDED
     if abs(cross_score - x_score) <= 1e-9:
@@ -118,27 +178,45 @@ def run_user_mode():
 
     print()
     print("#" + "-" * 30)
-    print("# [1] 패턴 입력")
+    print("# [1] 필터 A 입력")
     print("#" + "-" * 30)
 
-    input_data = input_matrix()
+    filter_a = input_matrix_3x3()
 
     print()
     print("#" + "-" * 30)
-    print("# [2] MAC 결과")
+    print("# [2] 필터 B 입력")
     print("#" + "-" * 30)
 
-    # Cross 필터와 MAC
-    cross_score = mac(input_data, CROSS_FILTER)
+    filter_b = input_matrix_3x3()
 
-    # X 필터와 MAC
-    x_score = mac(input_data, X_FILTER)
+    print()
+    print("#" + "-" * 30)
+    print("# [3] 패턴 입력")
+    print("#" + "-" * 30)
+
+    input_data = input_matrix_3x3()
+
+    print()
+    print("#" + "-" * 30)
+    print("# [4] MAC 결과")
+    print("#" + "-" * 30)
+
+    # MAC 점수
+    a_score = mac(input_data, filter_a)
+    b_score = mac(input_data, filter_b)
+
+    # 성능 측정
+    a_time = benchmark_mac(input_data, filter_a)
+    b_time = benchmark_mac(input_data, filter_b)
 
     # 판정
-    result = classify(cross_score, x_score)
+    result = classify(a_score, b_score)
 
-    print(f"Cross 점수: {cross_score}")
-    print(f"X 점수: {x_score}")
+    print(f"A 점수: {a_score}")
+    print(f"B 점수: {b_score}")
+    print(f"A 평균 연산 시간(10회): {a_time:.3f} ms")
+    print(f"B 평균 연산 시간(10회): {b_time:.3f} ms")
     print(f"판정: {result}")
 
 def main():
