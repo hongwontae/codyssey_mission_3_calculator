@@ -1,23 +1,17 @@
 import json
 import time
 
-
-
-# CROSS_FILTER = [
-#     [0, 1, 0],
-#     [1, 1, 1],
-#     [0, 1, 0]
-# ]
-
-# X_FILTER = [
-#     [1, 0, 1],
-#     [0, 1, 0],
-#     [1, 0, 1]
-# ]
-
 def run_json_mode():
     with open("data.json", "r") as file:
         data = json.load(file)
+
+    if "patterns" not in data:
+        print("FAIL: data.json에 patterns가 없습니다.")
+        return
+
+    if "filters" not in data:
+        print("FAIL: data.json에 filters가 없습니다.")
+        return
 
     patterns = data["patterns"]
     filters = data["filters"]
@@ -34,14 +28,107 @@ def run_json_mode():
         print(f"# [{pattern_name}]")
         print("#" + "-" * 30)
 
+        if "input" not in pattern:
+            print("결과: FAIL")
+            print("사유: input이 없습니다.")
+            failed += 1
+            total += 1
+            fail_cases.append(pattern_name)
+            continue
+
+        if "expected" not in pattern:
+            print("결과: FAIL")
+            print("사유: expected가 없습니다.")
+            failed += 1
+            total += 1
+            fail_cases.append(pattern_name)
+            continue
+
         input_data = pattern["input"]
         expected = pattern["expected"]
 
-        size_key = "_".join(pattern_name.split("_")[:2])
+        if expected not in ("+", "x", "X", "UNDECIDED"):
+            print("결과: FAIL")
+            print("사유: expected 값이 올바르지 않습니다.")
+            failed += 1
+            total += 1
+            fail_cases.append(pattern_name)
+            continue
+
+        parts = pattern_name.split("_")
+
+        if len(parts) != 3 or parts[0] != "size":
+            print("결과: FAIL")
+            print("사유: 패턴 이름 형식이 올바르지 않습니다.")
+            failed += 1
+            total += 1
+            fail_cases.append(pattern_name)
+            continue
+
+        try:
+            size = int(parts[1])
+        except ValueError:
+            print("결과: FAIL")
+            print("사유: 패턴 크기가 숫자가 아닙니다.")
+            failed += 1
+            total += 1
+            fail_cases.append(pattern_name)
+            continue
+
+        size_key = "_".join(parts[:2])
+
+        if size_key not in filters:
+            print("결과: FAIL")
+            print(f"사유: {size_key} 필터가 없습니다.")
+            failed += 1
+            total += 1
+            fail_cases.append(pattern_name)
+            continue
+
         size_filter = filters[size_key]
+
+        if not validate_matrix(input_data, size):
+            print("결과: FAIL")
+            print("사유: 패턴 크기가 올바르지 않습니다.")
+            failed += 1
+            total += 1
+            fail_cases.append(pattern_name)
+            continue
+
+        if "cross" not in size_filter:
+            print("결과: FAIL")
+            print("사유: Cross 필터가 없습니다.")
+            failed += 1
+            total += 1
+            fail_cases.append(pattern_name)
+            continue
+
+        if "x" not in size_filter:
+            print("결과: FAIL")
+            print("사유: X 필터가 없습니다.")
+            failed += 1
+            total += 1
+            fail_cases.append(pattern_name)
+            continue
 
         cross_filter = size_filter["cross"]
         x_filter = size_filter["x"]
+
+        if not validate_filter_matrix(cross_filter, size):
+            print("결과: FAIL")
+            print("사유: Cross 필터 크기가 올바르지 않습니다.")
+            failed += 1
+            total += 1
+            fail_cases.append(pattern_name)
+            continue
+
+        if not validate_filter_matrix(x_filter, size):
+            print("결과: FAIL")
+            print("사유: X 필터 크기가 올바르지 않습니다.")
+            failed += 1
+            total += 1
+            fail_cases.append(pattern_name)
+            continue
 
         # MAC 점수
         cross_score = mac(input_data, cross_filter)
@@ -52,7 +139,6 @@ def run_json_mode():
         x_time = benchmark_mac(input_data, x_filter)
 
         # 연산 횟수
-        size = len(input_data)
         operation_count = size * size
 
         result = classify(cross_score, x_score)
@@ -126,6 +212,46 @@ def benchmark_mac(input_data, filter_data):
     average_time_ms = average_time * 1000
 
     return average_time_ms
+
+def validate_matrix(matrix, expected_size):
+    if not isinstance(matrix, list):
+        return False
+
+    if len(matrix) != expected_size:
+        return False
+
+    for row in matrix:
+        if not isinstance(row, list):
+            return False
+
+        if len(row) != expected_size:
+            return False
+
+        for value in row:
+            if value not in (0, 1):
+                return False
+
+    return True
+
+def validate_filter_matrix(matrix, expected_size):
+    if not isinstance(matrix, list):
+        return False
+
+    if len(matrix) != expected_size:
+        return False
+
+    for row in matrix:
+        if not isinstance(row, list):
+            return False
+
+        if len(row) != expected_size:
+            return False
+
+        for value in row:
+            if not isinstance(value, (int, float)):
+                return False
+
+    return True
 
 def input_matrix_3x3():
     matrix = []
