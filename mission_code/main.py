@@ -313,6 +313,15 @@ def classify(cross_score, x_score):
 
     return "X"
 
+def classify_ab(a_score, b_score):
+    if abs(a_score - b_score) < 1e-9:
+        return "UNDECIDED"
+
+    if a_score > b_score:
+        return "A"
+
+    return "B"
+
 def normalize_expected(expected):
     if expected == "+":
         return "Cross"
@@ -359,7 +368,7 @@ def run_user_mode():
     b_time = benchmark_mac(input_data, filter_b)
 
     # 판정
-    result = classify(a_score, b_score)
+    result = classify_ab(a_score, b_score)
 
     print(f"A 점수: {a_score}")
     print(f"B 점수: {b_score}")
