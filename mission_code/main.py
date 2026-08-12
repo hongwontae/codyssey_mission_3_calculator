@@ -20,6 +20,7 @@ def run_json_mode():
     passed = 0
     failed = 0
     fail_cases = []
+    performance = {}
 
     for pattern_name, pattern in patterns.items():
 
@@ -141,6 +142,14 @@ def run_json_mode():
         # 연산 횟수
         operation_count = size * size
 
+        # 크기별 성능 기록
+        if size not in performance:
+            performance[size] = []
+
+        average_time = (cross_time + x_time) / 2
+
+        performance[size].append(average_time)
+
         result = classify(cross_score, x_score)
 
         # JSON의 expected 라벨을 프로그램 판정값으로 변환
@@ -165,6 +174,20 @@ def run_json_mode():
             print("결과: FAIL")
             failed += 1
             fail_cases.append(pattern_name)
+
+    print()
+    print("#" + "-" * 30)
+    print("# [3] 성능 분석")
+    print("#" + "-" * 30)
+
+    print("크기\t평균 시간(ms)\t연산 횟수")
+
+    for size in sorted(performance):
+        average_time = sum(performance[size]) / len(performance[size])
+        operation_count = size * size
+
+        print(f"{size}x{size}\t{average_time:.3f}\t\t{operation_count}")
+
 
     print()
     print("#" + "-" * 30)
@@ -282,8 +305,7 @@ def input_matrix_3x3():
     return matrix
 
 def classify(cross_score, x_score):
-    # 두 점수가 거의 같으면 UNDECIDED
-    if abs(cross_score - x_score) <= 1e-9:
+    if abs(cross_score - x_score) < 1e-9:
         return "UNDECIDED"
 
     if cross_score > x_score:
