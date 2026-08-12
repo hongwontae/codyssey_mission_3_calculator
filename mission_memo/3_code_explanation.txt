@@ -1,2 +1,121 @@
 1. validate_matrix
-    1-1. 
+    1-1. 2차원 배열이 내가 기대하는 N*N 크기의 올바른 패턴인지 검사하는 함수입니다.
+    1-2. JSON에서 가져온 input_data가 제대로 생겼는지 확인하는 역할입니다.
+    1-3. input_data -> pattern["input"] -> input의 2차원 배열
+    1-4. size -> pattern_name -> parts = pattern_name.split("_") -> size = int(parts[1])
+        => patterns의 input의 2차원 배열이 몇 개의 행과 열로 되어 있는지 알려주는 숫자
+    1-5. if not isinstance(matrix, list): -> 전체가 리스트인가?
+    1-6. len(matrix) == 5 -> 행이 5개인가?
+    1-7. isinstance(row, list) -> 각 행이 리스트인가?
+    1-8. len(row) == 5 -> 각 행에 값이 5개인가?
+    1-9. value in (0, 1) -> 각 값이 0또는 1인가?
+        => 0.0 == 0 -> True, 1.0 == 1 -> Tre
+
+    1-10. isinstance(value, 자료형)
+        => value가 자료형인지 확인하는 함수입니다. 반환값은 Bool입니다.
+        => isinstance(x, int) -> True
+    1-11. 모든 조건을 통과하면 True를 반환합니다.
+
+
+2. validate_filter_matrix
+    2-1. 필터 배열이 올바른 형태인지 검사하는 함수입니다.
+    2-2. cross_filter -> cross 형태의 2차원 배열
+    2-3. x_filters -> x 형태의 2차원 배열
+    2-4. size는 패턴의 크기면서 필터의 크기입니다.
+        => 과제에서 patterns의 키에서 n을 추출해서 해당 size N 필터를 선택하도록 요구
+    2-5. 여기서도 비슷한 검사가 시작됩니다.
+    2-6. 2차원 배열이 list인지, 전체 행이 size에 맞는지, 각 행이 리스트인지,
+    2-7. 각 행의 요소가 size에 맞는지, 각 행의 요소가 int 또는 float인지 확인합니다.
+
+
+
+3. run_json_mode-1
+    3-1. with open을 통해 data.json을 r 모드한 파일 객체를 가져옵니다.
+    3-2. ? in/not in dict_type -> 딕셔너리 타입에 대해서 키를 검사합니다.
+    3-3. if "patterns" not in data -> 딕셔너리 data에 patterns라는 키가 없다면
+        => print하고 return해라
+    3-4 if "filters" not in data -> 딕셔너리 data에 filters라는 키가 없다면
+        => print하고 return해라
+    3-5. 검사를 한 뒤 patterns = data["patterns"], filters = data["filters"]가져옵니다.
+        => 이 떄 filters는 {
+            # size는 행과 열의 개수를 의미합니다.
+            size_5 : {
+                cross : [2차원 배열],
+                x : [2차원 배열]
+            },
+            size_13 : {
+                cross : [2차원 배열],
+                x : [2차원 배열]
+            },
+            size_25 : {
+                cross : [2차원 배열],
+                x : [2차원 배열]
+            }
+        }
+        => 이 떄 patterns는 {
+            # size_n은 행과 열의 크기이며 expected는 모양을 의미합니다.
+            size_5_1 : {
+                input : [2차원 배열],
+                expected : "x"
+            },
+            size_5_2 : {
+                input : [2차원 배열],
+                expected : "+"
+            },
+            size_13_1 : {
+                input : [2차원 배열],
+                expected : "x"
+            },
+            ...
+        }
+
+    3-6. total, passed, failed, fail_cases, performance를 초기화합니다.
+    
+    3-7. for pattern_name, pattern in patterns.items() :
+        => patterns의 key는 pattern_name으로 value는 pattern으로 들어갑니다.
+        => ex) size_5_1 -> pattern_name / {input : [], expected :..} -> pattern으로
+    3-8. pattern의 key string이 input이나 pattern이 없다면 pirint()하고 failed +1, total+1, fail_cases.apeend, continue
+    
+    3-9. input_data = pattern["input"]
+        => input_data = [2차원 배열]
+    3-10. expected = pattern["expected"]
+        => expected = "x" | "+"
+    3-11. if expected not in ("+", "x", "X", "UNDECIDED"):
+        => 만약 expected에 +, x, X, "UNDECIDED"이 없다면 expected값 오류처리
+    
+    3-12. parts = pattern_name.split("_")
+        => ex) parts = ["size", "5", "1"]
+    3-13. 만약 parts가 3개가 아니거나 0인덱스 요소가 size가 아니라면 오류 처리
+
+    3-14. size = int(parts[1])
+        => part1의 값은 2차원 배열의 행과 열의 개수를 의미
+        => 만약 int로 변환 -> 실패 -> ValueError 발생 -> 오류 처리
+    3-15. size_key = "_".join(parts[:2])
+        => parts[:2] -> ["size", "5", "1"] -> ["size", "5"]
+        => "_"join(list) -> "size_5"로 결합
+    3-16. if size_key not in filters:
+        => filter의 key 이름은 size_n으로 되어 있음 -> 이게 filters key에 없다면
+        => 오류처리
+    3-17. size_filter = filters[size_key] -> filters객체에 [size_key]로 접근
+        => {
+            cross : [2차원 배열],
+            x : [2차원 배열]} -> 이런 형태를 갖춤
+    3-18. if "cross" not in size_filter: / if "x" not in size_filter:
+        => 만약 size_filter의 key 문자열에 cross나 x가 없다면 failed처리
+    
+    3-19. cross_filter = size_filter["cross"]
+        => filter의 cross 2차원 배열
+    3-20. x_filter = size_filter["x"]
+        => filter의 x 2차원 배열
+
+    
+
+
+
+
+
+
+
+
+
+

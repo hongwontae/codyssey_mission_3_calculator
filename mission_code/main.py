@@ -76,6 +76,14 @@ def run_json_mode():
             fail_cases.append(pattern_name)
             continue
 
+        if not validate_matrix(input_data, size):
+            print("결과: FAIL")
+            print("사유: 패턴 크기가 올바르지 않습니다.")
+            failed += 1
+            total += 1
+            fail_cases.append(pattern_name)
+            continue
+
         size_key = "_".join(parts[:2])
 
         if size_key not in filters:
@@ -87,14 +95,6 @@ def run_json_mode():
             continue
 
         size_filter = filters[size_key]
-
-        if not validate_matrix(input_data, size):
-            print("결과: FAIL")
-            print("사유: 패턴 크기가 올바르지 않습니다.")
-            failed += 1
-            total += 1
-            fail_cases.append(pattern_name)
-            continue
 
         if "cross" not in size_filter:
             print("결과: FAIL")
