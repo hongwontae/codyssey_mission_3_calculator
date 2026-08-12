@@ -20,4 +20,39 @@
     3-1. 입력을 받아서 2차원 배열을 만드는 함수입니다.
     3-2. matrix = [] 상단에 정의
     3-3. for + range를 통해 0,1,2 -> i로 해서 2차원 배열을 만들 준비를 합니다.
-    3-4. 
+    3-4. for문 내부에 while문을 둬서 if check, ValueError시 다시 시도하게 합니다.
+    3-5. row = list(map(int, input(f"{i + 1}번째 행: ").split()))
+        => input을 통해 행을 받아들입니다. 
+        => input().split() -> 공백을 기준으로 문자열을 나눠서 리스트로 만듭니다.
+        => map으로 반복가능한 객체에 하나씩 함수를 적용합니다.
+        => 그리고 map 객체를 list() 함수로 list 객체로 만듭니다.
+    3-6. if len(row) != 3 만약 3개가 아니라면 continue로 다시 실행
+    3-7. if any(value not in (0,1) for value in row)
+        => for value in row ->  반복 가능한 객체의 요소를 하나씩 꺼냅니다.
+        => value not in (0,1) -> value에 0과 1이 포함되지 않는가? 0,1이 나오면 False입니다.
+        => any -> 반복 가능한 객체를 받아들여서 하나라도 True라면 True
+        => any는 제너레이터를 받아들여서 검사
+    3-8. 검사를 통과하면 해당 row를 append하고 해당 반복문 종료 -> 다음 for문으로 향함
+    3-9. 만약 int로 변환하는데 실패 -> ValueError except 처리
+
+
+4. 제너레이터
+    4-1. 값을 한꺼번에 만들지 않고, 필요할 떄 하나씩 넘겨주는 객체입니다.
+    4-2. def generate_numbers () :
+            yield 1
+            yield 2
+            yield 3
+        numbers = generate_numbers()
+    4-3. generate_numbers는 제너레이터 함수입니다.
+    4-4. numbers는 제너레이터 객체가 들어갑니다. -> 제네레이터 함수를 호출하면 제너레이터 객체가 들어갑니다.
+    4-5.yield는 1을 주고/ 다음에 요청하면 2주고 / 다음에 요청하면 3주는 함수입니다.
+    4-6. next(제네레이터 객체) -> yield의 순서에 맞게 전달
+
+
+5. mac 흐름
+    5-1. 2차원 배열과 2차원 필터를 인자로 받습니다.
+    5-2. 2차원 배열에 len 처리 -> 행의 개수를 반환합니다. size = 행의 개수
+    5-3. for문을 돌리는데 이 떄 외곽 for은 행을 의미하고 내부 for은 열을 의미합니다.
+        => [행][열]
+    5-4. 그래서 정확히 같은 위치의 요소끼리 곱할 수 있습니다. -> 그 값을 score에 더함
+
