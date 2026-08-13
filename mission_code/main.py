@@ -333,7 +333,6 @@ def input_matrix_3x3():
         while True:
             try:
                 row = list(map(int, input(f"{i + 1}번째 행: ").split()))
-
                 # 숫자가 정확히 3개인지 확인
                 if len(row) != 3:
                     print("숫자 3개를 입력해주세요.")
