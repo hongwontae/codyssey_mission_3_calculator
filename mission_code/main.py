@@ -5,9 +5,13 @@ def run_json_mode():
     try :
         with open("data.json", "r", encoding="utf-8") as file:
             data = json.load(file)
-    except Exception as error:
-        print(f"data.json? show {error}")
-        return 
+    except FileNotFoundError:
+        print("data.json 파일을 찾을 수 없습니다.")
+        return
+
+    except json.JSONDecodeError:
+        print("data.json의 JSON 형식이 올바르지 않습니다.")
+        return
 
     if not isinstance(data, dict) :
         print("FAIL : data.json의 최상위 구조가 올바르지 않습니다.")
@@ -36,7 +40,6 @@ def run_json_mode():
     passed = 0
     failed = 0
     fail_cases = []
-    performance = {}
 
     for pattern_name, pattern in patterns.items():
 
@@ -45,7 +48,7 @@ def run_json_mode():
             print("사유: 패턴 데이터 형식이 올바르지 않습니다.")
             failed += 1
             total += 1
-            fail_cases.append(pattern_name)
+            fail_cases.append((pattern_name, "사유: 패턴 데이터 형식이 올바르지 않습니다."))
             continue
 
         print()
@@ -58,7 +61,7 @@ def run_json_mode():
             print("사유: input이 없습니다.")
             failed += 1
             total += 1
-            fail_cases.append(pattern_name)
+            fail_cases.append((pattern_name, "사유: input이 없습니다."))
             continue
 
         if "expected" not in pattern:
@@ -66,7 +69,7 @@ def run_json_mode():
             print("사유: expected가 없습니다.")
             failed += 1
             total += 1
-            fail_cases.append(pattern_name)
+            fail_cases.append((pattern_name, "사유: expected가 없습니다."))
             continue
 
         input_data = pattern["input"]
@@ -77,7 +80,7 @@ def run_json_mode():
             print("사유: expected 값이 올바르지 않습니다.")
             failed += 1
             total += 1
-            fail_cases.append(pattern_name)
+            fail_cases.append((pattern_name,"사유: expected 값이 올바르지 않습니다."))
             continue
 
         parts = pattern_name.split("_")
@@ -87,7 +90,7 @@ def run_json_mode():
             print("사유: 패턴 이름 형식이 올바르지 않습니다.")
             failed += 1
             total += 1
-            fail_cases.append(pattern_name)
+            fail_cases.append((pattern_name, "사유: 패턴 이름 형식이 올바르지 않습니다."))
             continue
 
         try:
@@ -97,7 +100,7 @@ def run_json_mode():
             print("사유: 패턴 크기가 숫자가 아닙니다.")
             failed += 1
             total += 1
-            fail_cases.append(pattern_name)
+            fail_cases.append((pattern_name, "사유: 패턴 크기가 숫자가 아닙니다."))
             continue
 
         ## 여기부터 시작!
@@ -106,7 +109,7 @@ def run_json_mode():
             print("사유: 패턴 크기가 올바르지 않습니다.")
             failed += 1
             total += 1
-            fail_cases.append(pattern_name)
+            fail_cases.append((pattern_name, "사유: 패턴 크기가 올바르지 않습니다."))
             continue
 
         ## parts[:2] -> ["size", "n"]
@@ -118,7 +121,7 @@ def run_json_mode():
             print(f"사유: {size_key} 필터가 없습니다.")
             failed += 1
             total += 1
-            fail_cases.append(pattern_name)
+            fail_cases.append((pattern_name, f"사유: {size_key} 필터가 없습니다."))
             continue
 
         # {cross : [2차원배열], x : [2차원배열]}
@@ -129,7 +132,7 @@ def run_json_mode():
             print("사유: 필터 데이터 형식이 올바르지 않습니다.")
             failed += 1
             total += 1
-            fail_cases.append(pattern_name)
+            fail_cases.append((pattern_name, "사유: 필터 데이터 형식이 올바르지 않습니다."))
             continue
 
         if "cross" not in size_filter:
@@ -137,7 +140,7 @@ def run_json_mode():
             print("사유: Cross 필터가 없습니다.")
             failed += 1
             total += 1
-            fail_cases.append(pattern_name)
+            fail_cases.append((pattern_name, "사유: Cross 필터가 없습니다."))
             continue
 
         if "x" not in size_filter:
@@ -145,7 +148,7 @@ def run_json_mode():
             print("사유: X 필터가 없습니다.")
             failed += 1
             total += 1
-            fail_cases.append(pattern_name)
+            fail_cases.append((pattern_name, "사유: X 필터가 없습니다."))
             continue
 
         # filter 2차원 배열
@@ -158,7 +161,7 @@ def run_json_mode():
             print("사유: Cross 필터 크기가 올바르지 않습니다.")
             failed += 1
             total += 1
-            fail_cases.append(pattern_name)
+            fail_cases.append((pattern_name, "사유: Cross 필터 크기가 올바르지 않습니다."))
             continue
 
         if not validate_filter_matrix(x_filter, size):
@@ -166,27 +169,12 @@ def run_json_mode():
             print("사유: X 필터 크기가 올바르지 않습니다.")
             failed += 1
             total += 1
-            fail_cases.append(pattern_name)
+            fail_cases.append((pattern_name, "사유: X 필터 크기가 올바르지 않습니다."))
             continue
 
         # MAC 점수
         cross_score = mac(input_data, cross_filter)
         x_score = mac(input_data, x_filter)
-
-        # 성능 측정
-        cross_time = benchmark_mac(input_data, cross_filter)
-        x_time = benchmark_mac(input_data, x_filter)
-
-        # 연산 횟수
-        operation_count = size * size
-
-        # 크기별 성능 기록
-        if size not in performance:
-            performance[size] = []
-
-        average_time = (cross_time + x_time) / 2
-
-        performance[size].append(average_time)
 
         result = classify(cross_score, x_score)
 
@@ -199,32 +187,20 @@ def run_json_mode():
         print("판정:", result)
         print("정답:", normalized_expected)
 
-        print(f"Cross 평균 시간(10회): {cross_time:.3f} ms")
-        print(f"X 평균 시간(10회): {x_time:.3f} ms")
-        print(f"연산 횟수: {operation_count}")
-
         total += 1
 
         if result == normalized_expected:
             print("결과: PASS")
             passed += 1
+
         else:
             print("결과: FAIL")
             failed += 1
-            fail_cases.append(pattern_name)
 
-    print()
-    print("#" + "-" * 30)
-    print("# [3] 성능 분석")
-    print("#" + "-" * 30)
+            reason = (f"판정 결과({result})와 " f"expected({normalized_expected})가 다릅니다.")
+            fail_cases.append((pattern_name, reason))
 
-    print("크기\t평균 시간(ms)\t연산 횟수")
-
-    for size in sorted(performance):
-        average_time = sum(performance[size]) / len(performance[size])
-        operation_count = size * size
-
-        print(f"{size}x{size}\t{average_time:.3f}\t\t{operation_count}")
+    run_performance_analysis()
 
 
     print()
@@ -240,8 +216,8 @@ def run_json_mode():
         print()
         print("실패 케이스:")
 
-        for case in fail_cases:
-            print(f"- {case}")
+        for pattern_name, reason in fail_cases:
+            print(f"- {pattern_name}: {reason}")
 
 def mac(input_data, filter_data):
     score = 0
@@ -255,24 +231,31 @@ def mac(input_data, filter_data):
     return score
 
 def benchmark_mac(input_data, filter_data):
-    total_time = 0
     repeat = 10
 
-    for _ in range(repeat):
-        start = time.perf_counter()
+    start = time.perf_counter()
 
+    for _ in range(repeat):
         mac(input_data, filter_data)
 
-        end = time.perf_counter()
+    end = time.perf_counter()
 
-        total_time += end - start
+    average_time = (end - start) / repeat
 
-    average_time = total_time / repeat
+    return average_time * 1000
 
-    # 초 -> 밀리초
-    average_time_ms = average_time * 1000
+def generate_benchmark_matrix(size):
+    matrix = []
 
-    return average_time_ms
+    for i in range(size):
+        row = []
+
+        for j in range(size):
+            row.append(1.0)
+
+        matrix.append(row)
+
+    return matrix
 
 def validate_matrix(matrix, expected_size):
     if not isinstance(matrix, list):
@@ -309,10 +292,37 @@ def validate_filter_matrix(matrix, expected_size):
             return False
 
         for value in row:
-            if not isinstance(value, (int, float)):
+            if not isinstance(value, (int, float)) or isinstance(value, bool):
                 return False
 
     return True
+
+def run_performance_analysis():
+
+    print()
+    print("#" + "-" * 30)
+    print("# [3] 성능 분석")
+    print("#" + "-" * 30)
+
+    print("크기\t평균 시간(ms)\t연산 횟수")
+
+    for size in (3, 5, 13, 25):
+
+        pattern = generate_benchmark_matrix(size)
+        filter_data = generate_benchmark_matrix(size)
+
+        average_time = benchmark_mac(
+            pattern,
+            filter_data
+        )
+
+        operation_count = size * size
+
+        print(
+            f"{size}x{size}\t"
+            f"{average_time:.3f}\t\t"
+            f"{operation_count}"
+        )
 
 def input_matrix_3x3():
     matrix = []
