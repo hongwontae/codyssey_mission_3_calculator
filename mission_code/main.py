@@ -2,8 +2,16 @@ import json
 import time
 
 def run_json_mode():
-    with open("data.json", "r") as file:
-        data = json.load(file)
+    try :
+        with open("data.json", "r", encoding="utf-8") as file:
+            data = json.load(file)
+    except Exception as error:
+        print(f"data.json? show {error}")
+        return 
+
+    if not isinstance(data, dict) :
+        print("FAIL : data.json의 최상위 구조가 올바르지 않습니다.")
+        return
 
     if "patterns" not in data:
         print("FAIL: data.json에 patterns가 없습니다.")
@@ -16,6 +24,14 @@ def run_json_mode():
     patterns = data["patterns"]
     filters = data["filters"]
 
+    if not isinstance(patterns, dict) :
+        print("FAIL: patterns가 올바른 형식이 아닙니다.")
+        return 
+    
+    if not isinstance(filters, dict) :
+        print("FAIL: filters가 올바른 형식이 아닙니다.")
+        return
+
     total = 0
     passed = 0
     failed = 0
@@ -23,6 +39,14 @@ def run_json_mode():
     performance = {}
 
     for pattern_name, pattern in patterns.items():
+
+        if not isinstance(pattern, dict):
+            print("결과: FAIL")
+            print("사유: 패턴 데이터 형식이 올바르지 않습니다.")
+            failed += 1
+            total += 1
+            fail_cases.append(pattern_name)
+            continue
 
         print()
         print("#" + "-" * 30)
@@ -99,6 +123,14 @@ def run_json_mode():
 
         # {cross : [2차원배열], x : [2차원배열]}
         size_filter = filters[size_key]
+
+        if not isinstance(size_filter, dict):
+            print("결과: FAIL")
+            print("사유: 필터 데이터 형식이 올바르지 않습니다.")
+            failed += 1
+            total += 1
+            fail_cases.append(pattern_name)
+            continue
 
         if "cross" not in size_filter:
             print("결과: FAIL")
