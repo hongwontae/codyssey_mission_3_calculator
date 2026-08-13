@@ -6,11 +6,11 @@ def run_json_mode():
         with open("data.json", "r", encoding="utf-8") as file:
             data = json.load(file)
     except FileNotFoundError:
-        print("data.json 파일을 찾을 수 없습니다.")
+        print("Error : data.json 파일을 찾을 수 없습니다.")
         return
 
     except json.JSONDecodeError:
-        print("data.json의 JSON 형식이 올바르지 않습니다.")
+        print("Error : data.json의 JSON 형식이 올바르지 않습니다.")
         return
 
     if not isinstance(data, dict) :
@@ -18,22 +18,22 @@ def run_json_mode():
         return
 
     if "patterns" not in data:
-        print("FAIL: data.json에 patterns가 없습니다.")
+        print("Error : data.json에 patterns가 없습니다.")
         return
 
     if "filters" not in data:
-        print("FAIL: data.json에 filters가 없습니다.")
+        print("Error: data.json에 filters가 없습니다.")
         return
 
     patterns = data["patterns"]
     filters = data["filters"]
 
     if not isinstance(patterns, dict) :
-        print("FAIL: patterns가 올바른 형식이 아닙니다.")
+        print("Error: patterns가 올바른 형식이 아닙니다.")
         return 
     
     if not isinstance(filters, dict) :
-        print("FAIL: filters가 올바른 형식이 아닙니다.")
+        print("Error: filters가 올바른 형식이 아닙니다.")
         return
 
     total = 0
