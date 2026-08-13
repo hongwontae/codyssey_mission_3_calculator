@@ -1,4 +1,4 @@
-1. validate_matrix
+1. validate_matrix -> 내가 검증하고 싶은 2차원 배열 데이터
     1-1. 2차원 배열이 내가 기대하는 N*N 크기의 올바른 패턴인지 검사하는 함수입니다.
     1-2. JSON에서 가져온 input_data가 제대로 생겼는지 확인하는 역할입니다.
     1-3. input_data -> pattern["input"] -> input의 2차원 배열
@@ -17,7 +17,7 @@
     1-11. 모든 조건을 통과하면 True를 반환합니다.
 
 
-2. validate_filter_matrix
+2. validate_filter_matrix -> 필터
     2-1. 필터 배열이 올바른 형태인지 검사하는 함수입니다.
     2-2. cross_filter -> cross 형태의 2차원 배열
     2-3. x_filters -> x 형태의 2차원 배열
@@ -107,7 +107,45 @@
         => filter의 cross 2차원 배열
     3-20. x_filter = size_filter["x"]
         => filter의 x 2차원 배열
+    
+    3-12. vaildate_filter_matrix
+        => 해당 필터가 올바른지 검사합니다.
+    
+    3-13. cross_score = mac(input_data, cross_filter)
+        => input_data와 행과 열이 일치하는 cross_filter를 사용해서 mac 판별
+    
+    3-14. cross_time = benchmark_mac(input_data, cross_filter)
+        => 성능 측정
+    
+    3-15. operation_count = size * size
+        => 연산 횟수를 측정합니다.
+        => mac() 호출 한 번은 size에 따라 달라집니다.
+        => 중첩 for문이고 size를 받습니다. -> size * size가 연산횟수입니다.
+    
+    3-16. if size not in performance:
+        => performance라는 딕셔너리에 크기별 평균 실행 시간을 모아두는 과정입니다.
+        => performance[size] = [] -> size는 현 패턴의 크기, { n : []}
+        => average_time = (cross_time + x_time) / 2 -> cross,x의 연산 시간 평균
+        => performance[size].append(average_time) -> 그 평균을 {n : [여기에]} 넣습니다.
+        => 즉, [5x5 테스트들의 평균시간들], [13x13 테스트들의 평균시간들], [25x25 테스트들의 평균시간들]
 
+    3-17. result = classify(cross_score, x_score)
+        => cross_score, x_score를 가지고 최종적으로 x | cross 판별합니다.
+    
+    3-18. normalized_expected = normalize_expected(expected)
+        => json이 사용하는 판정 표현을 프로그램이 사용하는 판정으로 바꿉니다.
+        => patterns[size_n_n][expected] -> 프로그램 사용하는 판정으로
+    
+    3-19. 크로스 점수, x 점수, 점수 차이, 판정, 정답, 크로스/x 평균 시간, 연산횟수를 출력합니다.
+
+    3-20. total은 지금까지 몇 개의 테스트를 검사했는가를 알려주는 변수
+        => total += 1은 for이 정상적으로 돌아서 한 번 테스트 했다는 걸 더하는 것입니다.
+    
+    3-21. if result == normalized_expected:
+        => 프로그램이 판단한 결과와 JSON에 적힌 정답을 비교합니다.
+        => 같으면 pass, 그렇지 않으면 fail
+    
+    3-22. 
     
 
 

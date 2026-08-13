@@ -76,6 +76,7 @@ def run_json_mode():
             fail_cases.append(pattern_name)
             continue
 
+        ## 여기부터 시작!
         if not validate_matrix(input_data, size):
             print("결과: FAIL")
             print("사유: 패턴 크기가 올바르지 않습니다.")
@@ -84,6 +85,8 @@ def run_json_mode():
             fail_cases.append(pattern_name)
             continue
 
+        ## parts[:2] -> ["size", "n"]
+        ## "_".join -> "size_n" -> filter의 키로 사용하겠다.
         size_key = "_".join(parts[:2])
 
         if size_key not in filters:
@@ -94,6 +97,7 @@ def run_json_mode():
             fail_cases.append(pattern_name)
             continue
 
+        # {cross : [2차원배열], x : [2차원배열]}
         size_filter = filters[size_key]
 
         if "cross" not in size_filter:
@@ -112,9 +116,11 @@ def run_json_mode():
             fail_cases.append(pattern_name)
             continue
 
+        # filter 2차원 배열
         cross_filter = size_filter["cross"]
         x_filter = size_filter["x"]
 
+        # -> pattern의 key로 filter를 찾았으니까 size 그대로 써도 ㄱㅊ
         if not validate_filter_matrix(cross_filter, size):
             print("결과: FAIL")
             print("사유: Cross 필터 크기가 올바르지 않습니다.")
@@ -159,7 +165,7 @@ def run_json_mode():
         print("X 점수:", x_score)
         print("점수 차이:", abs(cross_score - x_score))
         print("판정:", result)
-        print("정답:", expected)
+        print("정답:", normalized_expected)
 
         print(f"Cross 평균 시간(10회): {cross_time:.3f} ms")
         print(f"X 평균 시간(10회): {x_time:.3f} ms")
