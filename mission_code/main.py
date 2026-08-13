@@ -75,13 +75,14 @@ def run_json_mode():
         input_data = pattern["input"]
         expected = pattern["expected"]
 
-        if expected not in ("+", "x", "X", "UNDECIDED"):
+        if not isinstance(expected, str):
             print("결과: FAIL")
-            print("사유: expected 값이 올바르지 않습니다.")
+            print("사유: expected 값이 문자열이 아닙니다.")
             failed += 1
             total += 1
-            fail_cases.append((pattern_name,"사유: expected 값이 올바르지 않습니다."))
+            fail_cases.append((pattern_name, "사유: expected 값이 문자열이 아닙니다."))
             continue
+
 
         parts = pattern_name.split("_")
 
@@ -135,7 +136,21 @@ def run_json_mode():
             fail_cases.append((pattern_name, "사유: 필터 데이터 형식이 올바르지 않습니다."))
             continue
 
-        if "cross" not in size_filter:
+        normalized_filters = {}
+
+        try:
+            for raw_label, matrix in size_filter.items():
+                label = normalize_filter_label(raw_label)
+                normalized_filters[label] = matrix
+        except ValueError as error:
+            print("결과: FAIL")
+            print(f"사유: {error}")
+            failed += 1
+            total += 1
+            fail_cases.append((pattern_name, str(error)))
+            continue
+
+        if "Cross" not in normalized_filters:
             print("결과: FAIL")
             print("사유: Cross 필터가 없습니다.")
             failed += 1
@@ -143,7 +158,7 @@ def run_json_mode():
             fail_cases.append((pattern_name, "사유: Cross 필터가 없습니다."))
             continue
 
-        if "x" not in size_filter:
+        if "X" not in normalized_filters:
             print("결과: FAIL")
             print("사유: X 필터가 없습니다.")
             failed += 1
@@ -151,9 +166,8 @@ def run_json_mode():
             fail_cases.append((pattern_name, "사유: X 필터가 없습니다."))
             continue
 
-        # filter 2차원 배열
-        cross_filter = size_filter["cross"]
-        x_filter = size_filter["x"]
+        cross_filter = normalized_filters["Cross"]
+        x_filter = normalized_filters["X"]
 
         # -> pattern의 key로 filter를 찾았으니까 size 그대로 써도 ㄱㅊ
         if not validate_filter_matrix(cross_filter, size):
@@ -172,15 +186,26 @@ def run_json_mode():
             fail_cases.append((pattern_name, "사유: X 필터 크기가 올바르지 않습니다."))
             continue
 
+
+
+        # JSON의 expected 라벨을 프로그램 판정값으로 변환
+        try:
+            normalized_expected = normalize_expected(expected)
+        except ValueError as error:
+            print("결과: FAIL")
+            print(f"사유: {error}")
+            failed += 1
+            total += 1
+            fail_cases.append((pattern_name, str(error)))
+            continue
+
         # MAC 점수
         cross_score = mac(input_data, cross_filter)
         x_score = mac(input_data, x_filter)
 
         result = classify(cross_score, x_score)
 
-        # JSON의 expected 라벨을 프로그램 판정값으로 변환
-        normalized_expected = normalize_expected(expected)
-
+        
         print("Cross 점수:", cross_score)
         print("X 점수:", x_score)
         print("점수 차이:", abs(cross_score - x_score))
@@ -370,13 +395,26 @@ def classify_ab(a_score, b_score):
     return "B"
 
 def normalize_expected(expected):
-    if expected == "+":
+    normalized = expected.strip().lower()
+
+    if normalized == "+":
         return "Cross"
 
-    if expected.lower() == "x":
+    if normalized == "x":
         return "X"
 
-    return "UNDECIDED"
+    raise ValueError(f"지원하지 않는 expected 라벨입니다: {expected}")
+
+def normalize_filter_label(label):
+    normalized = label.strip().lower()
+
+    if normalized == "cross":
+        return "Cross"
+
+    if normalized == "x":
+        return "X"
+
+    raise ValueError(f"지원하지 않는 필터 라벨입니다: {label}")
 
 def run_user_mode():
 
