@@ -31,12 +31,13 @@
 
 3. run_json_mode-1
     3-1. with open을 통해 data.json을 r 모드한 파일 객체를 가져옵니다.
-    3-2. ? in/not in dict_type -> 딕셔너리 타입에 대해서 키를 검사합니다.
-    3-3. if "patterns" not in data -> 딕셔너리 data에 patterns라는 키가 없다면
-        => print하고 return해라
-    3-4 if "filters" not in data -> 딕셔너리 data에 filters라는 키가 없다면
-        => print하고 return해라
-    3-5. 검사를 한 뒤 patterns = data["patterns"], filters = data["filters"]가져옵니다.
+        => try로 묶어서 파일을 찾을 수 없거나 JSON 형식이 이상하면 return 합니다.
+    
+    3-2. if not isInstance(data, dict)
+        => 가져오는 객체의 최상위 구조를 dict인지 확인하고 아니라면 return
+    3-3. data에 patterns key, filters라는 키가 없다면 return
+
+    3-4. 검사를 한 뒤 patterns = data["patterns"], filters = data["filters"]가져옵니다.
         => 이 떄 filters는 {
             # size는 행과 열의 개수를 의미합니다.
             size_5 : {
@@ -69,12 +70,20 @@
             ...
         }
 
-    3-6. total, passed, failed, fail_cases, performance를 초기화합니다.
+    3-5. if not isinstance를 통해 가져온 patterns나 filter가 dict 형식이 아니라면 return
+
+    3-6. total, passed, failed, fail_cases를 초기화합니다.
     
     3-7. for pattern_name, pattern in patterns.items() :
+        => for문이 data.json에 들어있는 모든 패턴 케이스를 하나씩 꺼내서 검사하고 실행하는 부분입니다.
         => patterns의 key는 pattern_name으로 value는 pattern으로 들어갑니다.
         => ex) size_5_1 -> pattern_name / {input : [], expected :..} -> pattern으로
-    3-8. pattern의 key string이 input이나 pattern이 없다면 pirint()하고 failed +1, total+1, fail_cases.apeend, continue
+
+    3-8. if not isinstance (pattern, dict)
+        => 만약 패턴이 객체 형식이 아니라면 Fail 처리합니다.
+        => Fail 처리 
+        => failed+=1/total+=1/fail.cases.append((pattern_name), reason) contine 처리입니다.
+
     
     3-9. input_data = pattern["input"]
         => input_data = [2차원 배열]

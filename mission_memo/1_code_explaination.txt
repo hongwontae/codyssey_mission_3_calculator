@@ -1,9 +1,10 @@
 1. if __name__ == "__main__" :
         main()
-    1-1. 터미널에서 python main.py 실행
-    1-2. 파이썬이 내부적으로 main.py의 특별한 변수인 __name__에 "__main__"이라는 값을 넣어줍니다.
-    1-3. __name__이 "__main__"이라면 파일 이름이 아니고 직접 실행된 파일이라는 의미를 가집니다. 
-    1-4. 만약 다른 파일에서 import main를 가져와서 __name__을 print하면 그 파일이름 자체가 나옵니다. -> (main)
+    1-1. python main.py -> 직접 실행한 파일(main.py)에서는 __name__이 "__main__"이 됩니다.
+    1-2. 만약 test.py에 print(__name__)이 존재하고 main에서 import 
+        => 그리고 python main.py를 하면 test.py의 __name__은 test라고 나옵니다.
+    1-3. test.py를 직접 실행한게 아니라 main.py가 import test -> __name__ -> test
+        => 만약 test.py를 직접 실행하면 -> __name__은 __main__
 
 
 2. main() 실행 흐름

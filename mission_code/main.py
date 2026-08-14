@@ -8,7 +8,6 @@ def run_json_mode():
     except FileNotFoundError:
         print("Error : data.json 파일을 찾을 수 없습니다.")
         return
-
     except json.JSONDecodeError:
         print("Error : data.json의 JSON 형식이 올바르지 않습니다.")
         return
@@ -41,6 +40,7 @@ def run_json_mode():
     failed = 0
     fail_cases = []
 
+    ## pattern_name은 size_5_1 같은 이름 / patteren에는 {input : [2차원 배열], expected : "x | +"}
     for pattern_name, pattern in patterns.items():
 
         if not isinstance(pattern, dict):
@@ -104,7 +104,6 @@ def run_json_mode():
             fail_cases.append((pattern_name, "사유: 패턴 크기가 숫자가 아닙니다."))
             continue
 
-        ## 여기부터 시작!
         if not validate_matrix(input_data, size):
             print("결과: FAIL")
             print("사유: 패턴 크기가 올바르지 않습니다.")
@@ -225,8 +224,8 @@ def run_json_mode():
             reason = (f"판정 결과({result})와 " f"expected({normalized_expected})가 다릅니다.")
             fail_cases.append((pattern_name, reason))
 
+    # for 끝 다음
     run_performance_analysis()
-
 
     print()
     print("#" + "-" * 30)
@@ -363,7 +362,7 @@ def input_matrix_3x3():
                     print("숫자 3개를 입력해주세요.")
                     continue
 
-                # 0 또는 1인지 확인 [0, 1, 0]
+                # 0 또는 1인지 확인 [0, 1, 0], [0, 5, 0]
                 if any(value not in (0, 1) for value in row):
                     print("0 또는 1만 입력해주세요.")
                     continue
