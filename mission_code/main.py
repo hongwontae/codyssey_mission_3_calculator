@@ -267,7 +267,7 @@ def benchmark_mac(input_data, filter_data):
     end = time.perf_counter()
 
     average_time = (end - start) / repeat
-
+    
     return average_time * 1000
 
 def generate_benchmark_matrix(size):
@@ -477,8 +477,6 @@ def run_user_mode():
         f"{performance_time:.3f}\t\t"
         f"{operation_count}"
     )
-
-    
 
 def main():
 
