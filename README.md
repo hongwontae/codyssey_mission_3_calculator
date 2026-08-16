@@ -3,12 +3,14 @@
 ## 1. 콘솔 출력
 
 ### 1-1. run_user_mode 결과 콘솔 이미지
-[](./misson_image/user_mode_1.png)
-[](./misson_image/user_mode_2.png)
+![](./misson_image/user_mode_1.png)
+
+![](./misson_image/user_mode_2.png)
 ---
 
 ### 1-2. run_json_mode 결과 콘솔 이미지 (data.json)
-
+![](./misson_image/data_json_1.png)
+![](./misson_image/data_json_2.png)
 --- 
 
 ## 2. 결과 리포트 테스트 결과
