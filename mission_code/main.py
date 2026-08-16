@@ -259,14 +259,14 @@ def mac(input_data, filter_data):
 def benchmark_mac(input_data, filter_data):
     repeat = 10
 
-    start = time.perf_counter()
-
+    average_time = 0
     for _ in range(repeat):
+        start = time.perf_counter()
         mac(input_data, filter_data)
+        end = time.perf_counter()
+        average_time += (end - start)
 
-    end = time.perf_counter()
-
-    average_time = (end - start) / repeat
+    average_time /= repeat
     
     return average_time * 1000
 
