@@ -463,6 +463,23 @@ def run_user_mode():
     print(f"B 평균 연산 시간(10회): {b_time:.3f} ms")
     print(f"판정: {result}")
 
+    print()
+    print("#" + "-" * 30)
+    print("# [5] 성능 분석 (3x3)")
+    print("#" + "-" * 30)
+
+    performance_time = benchmark_mac(input_data, filter_a)
+    operation_count = 3 * 3
+
+    print("크기\t평균 시간(ms)\t연산 횟수")
+    print(
+        f"3x3\t"
+        f"{performance_time:.3f}\t\t"
+        f"{operation_count}"
+    )
+
+    
+
 def main():
 
     try :
