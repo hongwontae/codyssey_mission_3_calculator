@@ -13,7 +13,7 @@ def run_json_mode():
         return
 
     if not isinstance(data, dict) :
-        print("FAIL : data.json의 최상위 구조가 올바르지 않습니다.")
+        print("Error : data.json의 최상위 구조가 올바르지 않습니다.")
         return
 
     if "patterns" not in data:
@@ -84,6 +84,8 @@ def run_json_mode():
             continue
 
 
+        # size_n1_n2 -> ["size", "n1", "n2"]
+        # n1은 행과 열의 개수 / n2에서 1은 x, 2는 cross를 의미합니다.
         parts = pattern_name.split("_")
 
         if len(parts) != 3 or parts[0] != "size":
@@ -186,7 +188,6 @@ def run_json_mode():
             continue
 
 
-
         # JSON의 expected 라벨을 프로그램 판정값으로 변환
         try:
             normalized_expected = normalize_expected(expected)
@@ -209,6 +210,7 @@ def run_json_mode():
         print("X 점수:", x_score)
         print("점수 차이:", abs(cross_score - x_score))
         print("판정:", result)
+        # 정규화된 값으로 나옵니다. -> normalize_expected의 값이 정규화된 하나의 값
         print("정답:", normalized_expected)
 
         total += 1
@@ -281,6 +283,7 @@ def generate_benchmark_matrix(size):
 
     return matrix
 
+# 받아온 2차원 배열 데이터와 그 행과 열 숫자
 def validate_matrix(matrix, expected_size):
     if not isinstance(matrix, list):
         return False
@@ -490,7 +493,6 @@ def main():
                 print("잘못된 선택입니다.")
     except (KeyboardInterrupt, EOFError) :
         print("프로그램을 안전하게 종료합니다.") 
-
 
 if __name__ == "__main__":
     main()
